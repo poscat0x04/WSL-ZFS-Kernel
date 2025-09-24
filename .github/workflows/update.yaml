@@ -5,29 +5,86 @@ on:
   schedule:
     - cron: "0 4 1 * *"
 
+permissions:
+  contents: write
 
 jobs:
-  compile_and_upload:
+  plan:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.versions.outputs.tag }}
+    steps:
+      - name: resolve versions -> tag
+        id: versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          UPSTREAMKERNELVER=$(curl -s https://api.github.com/repos/microsoft/WSL2-Linux-Kernel/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+          UPSTREAMZFSVER=$(curl -s https://api.github.com/repos/openzfs/zfs/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+          echo "tag=${UPSTREAMKERNELVER}-${UPSTREAMZFSVER}" >> "$GITHUB_OUTPUT"
+
+  compile_and_upload:
+    needs: plan
+    runs-on: ubuntu-latest
+    # Prevent concurrent builds for the same version combo
+    concurrency:
+      group: wsl-zfs-${{ needs.plan.outputs.tag }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
           ref: master
           fetch-depth: 0
+
+      - name: check if release with asset already exists
+        id: check_release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = `${{ needs.plan.outputs.tag }}`;
+            try {
+              const rel = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag
+              });
+              const hasAsset = (rel.data.assets || []).some(a => a.name === 'bzImage');
+              core.setOutput('exists', hasAsset ? 'true' : 'false');
+            } catch (e) {
+              if (e.status === 404) {
+                core.setOutput('exists', 'false');
+              } else {
+                throw e;
+              }
+            }
+
       - name: install dependencies
+        if: steps.check_release.outputs.exists != 'true'
         run: |
           ./deps.sh
-      - name: build kernel
-        id: build
+
+      - name: source
+        if: steps.check_release.outputs.exists != 'true'
         env:
           KERNELDIR: linux
           ZFSDIR: zfs
           KCONFIG_CONFIG: Microsoft/config-wsl
         run: |
           ./source.sh
+
+      - name: build kernel
+        if: steps.check_release.outputs.exists != 'true'
+        env:
+          KERNELDIR: linux
+          ZFSDIR: zfs
+          KCONFIG_CONFIG: Microsoft/config-wsl
+        run: |
           ./build.sh
+
       - name: release
+        if: steps.check_release.outputs.exists != 'true' && github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.plan.outputs.tag }}
+          name: ${{ needs.plan.outputs.tag }}
           files: linux/arch/x86/boot/bzImage
-          tag_name: ${{steps.build.outputs.tag}}
