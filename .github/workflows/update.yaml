@@ -21,6 +21,7 @@ jobs:
         env:
           KERNELDIR: linux
           ZFSDIR: zfs
+          KCONFIG_CONFIG: Microsoft/config-wsl
         run:
           ./source.sh
           ./build.sh
