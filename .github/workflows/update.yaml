@@ -3,7 +3,7 @@ name: compile kernel
 on:
   push:
   schedule:
-    - cron: "0 4 1 * *"
+    - cron: "0 4 * * *"
 
 permissions:
   contents: write
