@@ -1,0 +1,30 @@
+name: compile kernel
+
+on:
+  push:
+  schedule:
+    - cron: "0 4 1 * *"
+
+
+jobs:
+  compile_and_upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: install dependencies
+        run: |
+          ./deps.sh
+      - name: build kernel
+        env:
+          KERNELDIR: linux
+          ZFSDIR: zfs
+        run:
+          ./source.sh
+          ./build.sh
+      - name: release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: linux/arch/x86/boot/bzImage
