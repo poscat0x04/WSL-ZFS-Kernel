@@ -18,14 +18,16 @@ jobs:
         run: |
           ./deps.sh
       - name: build kernel
+        id: build
         env:
           KERNELDIR: linux
           ZFSDIR: zfs
           KCONFIG_CONFIG: Microsoft/config-wsl
-        run:
+        run: |
           ./source.sh
           ./build.sh
       - name: release
         uses: softprops/action-gh-release@v2
         with:
           files: linux/arch/x86/boot/bzImage
+          tag_name: ${{steps.build.outputs.tag}}
