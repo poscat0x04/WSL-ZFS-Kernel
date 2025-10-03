@@ -19,9 +19,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          sudo apt-get install -y jq
           UPSTREAMKERNELVER=$(curl -s https://api.github.com/repos/microsoft/WSL2-Linux-Kernel/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
           UPSTREAMZFSVER=$(curl -s https://api.github.com/repos/openzfs/zfs/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-          echo "tag=${UPSTREAMKERNELVER}-${UPSTREAMZFSVER}" >> "$GITHUB_OUTPUT"
+          COMMIT=$(curl https://api.github.com/repos/poscat0x04/WSL-ZFS-Kernel/commits | jq -r ".[0].sha" | head -c 7)
+          echo "tag=${UPSTREAMKERNELVER}-${UPSTREAMZFSVER}-commit-${COMMIT}" >> "$GITHUB_OUTPUT"
 
   compile_and_upload:
     needs: plan
