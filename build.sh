@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu
+set -xeu
 
 pushd $KERNELDIR
 make -j$(nproc) LOCALVERSION=with-zfs

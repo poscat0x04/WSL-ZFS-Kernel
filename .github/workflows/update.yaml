@@ -18,7 +18,7 @@ jobs:
         id: versions
         shell: bash
         run: |
-          set -euo pipefail
+          set -xeuo pipefail
           sudo apt-get install -y jq
           UPSTREAMKERNELVER=$(curl -s https://api.github.com/repos/microsoft/WSL2-Linux-Kernel/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
           UPSTREAMZFSVER=$(curl -s https://api.github.com/repos/openzfs/zfs/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
