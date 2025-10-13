@@ -34,4 +34,6 @@ sudo apt-get install -y \
   python3-setuptools \
   uuid-dev \
   wget \
-  zlib1g-dev
+  zlib1g-dev \
+  cpio \
+  qemu-utils
