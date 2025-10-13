@@ -22,8 +22,8 @@ jobs:
           sudo apt-get install -y jq
           UPSTREAMKERNELVER=$(curl -s https://api.github.com/repos/microsoft/WSL2-Linux-Kernel/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
           UPSTREAMZFSVER=$(curl -s https://api.github.com/repos/openzfs/zfs/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-          COMMIT=$(curl https://api.github.com/repos/poscat0x04/WSL-ZFS-Kernel/commits | jq -r ".[0].sha" | head -c 7)
-          echo "tag=${UPSTREAMKERNELVER}-${UPSTREAMZFSVER}-commit-${COMMIT}" >> "$GITHUB_OUTPUT"
+          COMMIT_NUM=$(curl https://api.github.com/repos/poscat0x04/WSL-ZFS-Kernel/commits | jq -r ". | length")
+          echo "tag=v${COMMIT_NUM}-${UPSTREAMKERNELVER}-${UPSTREAMZFSVER}" >> "$GITHUB_OUTPUT"
 
   compile_and_upload:
     needs: plan
@@ -89,4 +89,6 @@ jobs:
         with:
           tag_name: ${{ needs.plan.outputs.tag }}
           name: ${{ needs.plan.outputs.tag }}
-          files: linux/arch/x86/boot/bzImage
+          files: |
+            linux/arch/x86/boot/bzImage
+            modules.vhdx
