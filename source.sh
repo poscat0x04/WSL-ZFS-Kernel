@@ -25,7 +25,7 @@ pushd $KERNELDIR
 cfg () {
   ./scripts/config --file $KCONFIG_CONFIG "$@"
 }
-cfg -m zfs
+cfg -e zfs
 
 cfg -e zswap
 cfg -e zswap_compressor_default_zstd
