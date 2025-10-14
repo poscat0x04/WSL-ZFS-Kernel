@@ -21,7 +21,9 @@ pushd $ZFSDIR
 popd
 
 pushd $KERNELDIR
-alias cfg="./scripts/config --file $KCONFIG_CONFIG"
+cfg () {
+  ./scripts/config --file $KCONFIG_CONFIG "$@"
+}
 cfg -m zfs
 
 cfg -e zswap
