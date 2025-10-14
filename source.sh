@@ -20,25 +20,20 @@ pushd $ZFSDIR
 ./copy-builtin $ROOT/$KERNELDIR
 popd
 
-cat <<EOF >>$KERNELDIR/$KCONFIG_CONFIG
+pushd $KERNELDIR
+alias cfg="./scripts/config --file $KCONFIG_CONFIG"
+cfg -m zfs
 
-CONFIG_ZFS=y
-CONFIG_CRYPTO_ZSTD=y
-CONFIG_ZSTD_COMMON=y
-CONFIG_ZSTD_COMPRESS=y
+cfg -e zswap
+cfg -e zswap_compressor_default_zstd
+cfg -e zswap_zpool_default_zsmalloc
+cfg -e module_compress_zstd
 
-CONFIG_FRONTSWAP=y
-CONFIG_ZSWAP=y
-CONFIG_ZSWAP_COMPRESSOR_DEFAULT_ZSTD=y
-CONFIG_ZSWAP_COMPRESSOR_DEFAULT="zstd"
-CONFIG_ZSWAP_ZPOOL_DEFAULT_ZSMALLOC=y
-CONFIG_ZSWAP_ZPOOL_DEFAULT="zsmalloc"
-CONFIG_ZSWAP_DEFAULT_ON=y
-CONFIG_ZPOOL=y
-CONFIG_ZSMALLOC=y
+cfg -e usb
+cfg -e usbip_core
+cfg -e usbip_vhci_hcd
+cfg -e usbip_host
+make olddefconfig
+popd
 
-CONFIG_USBIP_CORE=y
-CONFIG_USBIP_VHCI_HCD=y
-CONFIG_USBIP_HOST=y
-EOF
 echo "tag=$UPSTREAMKERNELVER-$UPSTREAMZFSVER" >>"$GITHUB_OUTPUT"
