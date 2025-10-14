@@ -15,6 +15,7 @@ UPSTREAMZFSVER=$(curl -s https://api.github.com/repos/openzfs/zfs/releases/lates
 test -d $ZFSDIR/.git || git clone --branch $UPSTREAMZFSVER --depth 1 https://github.com/zfsonlinux/zfs.git $ZFSDIR
 
 pushd $ZFSDIR
+sed -i 's#^MODULE_LICENSE(ZFS_META_LICENSE);$##g' module/os/linux/zfs/zfs_ioctl_os.c
 ./autogen.sh
 ./configure --enable-linux-builtin --with-linux=$ROOT/$KERNELDIR --with-linux-obj=$ROOT/$KERNELDIR
 ./copy-builtin $ROOT/$KERNELDIR
