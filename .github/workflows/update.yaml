@@ -91,4 +91,4 @@ jobs:
           name: ${{ needs.plan.outputs.tag }}
           files: |
             linux/arch/x86/boot/bzImage
-            modules.vhdx
+            linux/modules.vhdx
