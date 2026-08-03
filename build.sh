@@ -12,4 +12,4 @@ make -C tools/perf NO_JEVENTS= NO_JVMTI=1 NO_LIBTRACEEVENT=1 DESTDIR=$PWD/perf p
 
 ./Microsoft/scripts/gen_artifacts_vhdx.sh "$PWD/modules" "$PWD/headers" "$PWD/perf" $(make -s kernelrelease LOCALVERSION=-with-zfs) modules.vhdx
 
-du modules.vhdx
+du -h modules.vhdx

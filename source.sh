@@ -22,7 +22,7 @@ sed -i 's#^MODULE_LICENSE(ZFS_META_LICENSE);$##g' module/os/linux/zfs/zfs_ioctl_
 popd
 
 pushd $KERNELDIR
-cfg () {
+cfg() {
   ./scripts/config --file $KCONFIG_CONFIG "$@"
 }
 cfg -e zfs
@@ -36,6 +36,11 @@ cfg -e usb
 cfg -e usbip_core
 cfg -e usbip_vhci_hcd
 cfg -e usbip_host
+
+cfg -d bt
+cfg -d wireless
+cfg -d cfg80211
+
 make olddefconfig
 popd
 
